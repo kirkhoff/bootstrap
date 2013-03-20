@@ -48,7 +48,15 @@ module.exports = function(grunt) {
       dist_tpls:{
         src:['<%= dist %>/<%= filename %>-tpls-<%= pkg.version %>.js'],
         dest:'<%= dist %>/<%= filename %>-tpls-<%= pkg.version %>.min.js'
+      },
+      dist_ieshiv: {
+        src: ['<%= dist %>/ieshiv-<%= pkg.version %>.js'],
+        dest: '<%= dist %>/ieshiv-<%= pkg.version %>.min.js'
       }
+    },
+    ieshiv: {
+      src: 'misc/ieshiv-template.js',
+      dest: '<%= dist %>/ieshiv-<%= pkg.version %>.js'
     },
     html2js: {
       src: ['template/**/*.html']
@@ -158,7 +166,24 @@ module.exports = function(grunt) {
     grunt.config('concat.dist.src', grunt.config('concat.dist.src').concat(srcFiles));
     grunt.config('concat.dist_tpls.src', grunt.config('concat.dist_tpls.src').concat(srcFiles).concat(tplFiles));
 
-    grunt.task.run(['concat', 'uglify']);
+    grunt.task.run(['concat', 'ieshiv', 'uglify']);
+  });
+  
+  grunt.registerTask('ieshiv', 'Create the ieshiv file, based on the current build', function() {
+    var directives = [];
+    var matches = grunt.file.read(grunt.config('concat.dist.dest')).match(/\.directive\(('|")[^'"]*('|")/g);
+    
+    matches.forEach(function(match) {
+      directives.push(/('|")([^'"]+)('|")/.exec(match)[2]);
+    });
+    
+    grunt.file.write(
+      grunt.config('ieshiv.dest'),
+      grunt.template.process(grunt.file.read(grunt.config('ieshiv.src')), {data: {
+        directives: '"' + directives.join('", "') + '"',
+        version : grunt.config('pkg.version')
+      }})
+    );
   });
 
   grunt.registerTask('site', 'Create grunt demo site from every module\'s files', function() {
