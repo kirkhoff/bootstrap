@@ -172,7 +172,7 @@ module.exports = function(grunt) {
   
   grunt.registerTask('ieshiv', 'Create the ieshiv file, based on the current build', function() {
     var directives = [];
-    var matches = grunt.file.read(grunt.config('concat.dist.dest')).match(/\.directive\(('|")[^'"]*('|")/g);
+    var matches = grunt.file.read(grunt.config('concat.dist.dest')).match(/\.directive\([^'"]*('|")[^'"]*('|")/g);
     
     matches.forEach(function(match) {
       directives.push(/('|")([^'"]+)('|")/.exec(match)[2]);
