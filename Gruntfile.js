@@ -185,6 +185,8 @@ module.exports = function(grunt) {
         version : grunt.config('pkg.version')
       }})
     );
+    
+    grunt.log.writeln('File "' + grunt.config('ieshiv.dest') + '" created.');
   });
 
   grunt.registerTask('site', 'Create grunt demo site from every module\'s files', function() {
