@@ -18,7 +18,7 @@
 (function (exports) {
 
   var debug = window.ieShivDebug || false,
-      tags = ["ngInclude", "ngPluralize", "ngView", "ngSwitch", <%= directives %>];
+      tags = [<%= directives %>];
 
   window.myCustomTags =  window.myCustomTags || []; // externally defined by developer using angular-ui directives
   tags.push.apply(tags, window.myCustomTags);
