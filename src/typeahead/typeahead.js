@@ -30,7 +30,7 @@ angular.module('ui.bootstrap.typeahead', [])
 }])
 
   //options - min length
-  .directive('typeahead', ['$compile', '$q', '$document', 'typeaheadParser', function ($compile, $q, $document, typeaheadParser) {
+  .directive('typeahead', ['$compile', '$q', '$document', '$window', 'typeaheadParser', function ($compile, $q, $document, $window, typeaheadParser) {
 
   var HOT_KEYS = [9, 13, 27, 38, 40];
 
@@ -165,9 +165,28 @@ angular.module('ui.bootstrap.typeahead', [])
         resetMatches();
         scope.$digest();
       });
-
+      
+      // Calculate the current position and size of the directive element.
+      function getPosition( element ) {
+        var boundingClientRect = element[0].getBoundingClientRect();
+        return {
+          width: element.prop( 'offsetWidth' ),
+          height: element.prop( 'offsetHeight' ),
+          top: boundingClientRect.top + $window.pageYOffset,
+          left: boundingClientRect.left + $window.pageXOffset
+        };
+      }
+      
+      scope.elemPos = getPosition(element);
+      // I need to watch the position because it changes while
+      // the page is being $parsed and $compiled by angular
+      scope.$watch(function() { return getPosition(element); }, function(newVal) {
+        scope.elemPos = newVal;
+      }, true);
+      
       var tplElCompiled = $compile("<typeahead-popup matches='matches' active='activeIdx' select='select(activeIdx)' "+
-        "query='query'></typeahead-popup>")(scope);
+        "query='query' position='elemPos'></typeahead-popup>")(scope);
+      
       element.after(tplElCompiled);
     }
   };
@@ -181,14 +200,20 @@ angular.module('ui.bootstrap.typeahead', [])
         matches:'=',
         query:'=',
         active:'=',
-        select:'&'
+        select:'&',
+        position: '='
       },
       replace:true,
       templateUrl:'template/typeahead/typeahead.html',
-      link:function (scope, element, attrs) {
+      link:function (scope, element, attrs, typeaheadCtrl) {
 
         scope.isOpen = function () {
           return scope.matches.length > 0;
+        };
+        
+        // I need this because ng-show="isOpen()" doesn't do the trick :(
+        scope.displayStyle = function() {
+          return scope.isOpen() ? 'block' : 'none';
         };
 
         scope.isActive = function (matchIdx) {
@@ -202,6 +227,15 @@ angular.module('ui.bootstrap.typeahead', [])
         scope.selectMatch = function (activeIdx) {
           scope.select({activeIdx:activeIdx});
         };
+        
+        scope.$watch('position', function(newVal) {
+          var popupPosition = {
+            left: newVal.left,
+            top: newVal.top + newVal.height
+          };
+          
+          element.css(popupPosition);
+        });
       }
     };
   })
