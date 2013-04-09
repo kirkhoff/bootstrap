@@ -301,17 +301,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('server', 'start testacular server', function() {
-    var options = ['--no-single-run', '--no-auto-watch'];
-    
-    this.args.forEach(function(arg) {
-      if (arg == "ie8") {
-        options.push("testacular-ie8.conf.js");
-      }
-      else {
-        options.push(arg);
-      }
-    });
-    
+    var options = ['--no-single-run', '--no-auto-watch'].concat(this.args);
     runTestacular('start', options);
   });
 
