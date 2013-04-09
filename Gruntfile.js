@@ -270,13 +270,13 @@ module.exports = function(grunt) {
     files.forEach(html2js);
   });
 
-  // Testacular configuration
-  function runTestacular(command, options) {
-    var testacularCmd = process.platform === 'win32' ? 'testacular.cmd' : 'testacular';
+  // Karma configuration
+  function runKarma(command, options) {
+    var karmaCmd = process.platform === 'win32' ? 'karma.cmd' : 'karma';
     var args = [command].concat(options);
     var done = grunt.task.current.async();
     var child = grunt.util.spawn({
-        cmd: testacularCmd,
+        cmd: karmaCmd,
         args: args
     }, function(err, result, code) {
       if (code) {
@@ -297,22 +297,71 @@ module.exports = function(grunt) {
       //Can augment options with command line arguments
       options =  options.concat(this.args);
     }
-    runTestacular('start', options);
+    runKarma('start', options);
   });
 
-  grunt.registerTask('server', 'start testacular server', function() {
+  grunt.registerTask('server', 'start karma server', function() {
     var options = ['--no-single-run', '--no-auto-watch'].concat(this.args);
-    runTestacular('start', options);
+    runKarma('start', options);
   });
 
-  grunt.registerTask('test-run', 'run tests against continuous testacular server', function() {
+  grunt.registerTask('test-run', 'run tests against continuous karma server', function() {
     var options = ['--single-run', '--no-auto-watch'].concat(this.args);
-    runTestacular('run', options);
+    runKarma('run', options);
   });
 
-  grunt.registerTask('test-watch', 'start testacular server, watch & execute tests', function() {
+  grunt.registerTask('test-watch', 'start karma server, watch & execute tests', function() {
     var options = ['--no-single-run', '--auto-watch'].concat(this.args);
-    runTestacular('start', options);
+    runKarma('start', options);
+  });
+
+  //changelog generation
+  grunt.registerTask('changelog', 'generates changelog markdown from git commits', function () {
+
+    var changeFrom = this.args[0], changeTo = this.args[1] || 'HEAD';
+
+    var done = grunt.task.current.async();
+    var child = grunt.util.spawn({
+      cmd:process.platform === 'win32' ? 'git.cmd' : 'git',
+      args:['log', changeFrom + '..' + changeTo, '--oneline']
+    }, function (err, result, code) {
+
+      var changelog = {
+        chore: {}, demo: {}, docs: {}, feat: {}, fix: {}, refactor: {}, style: {}, test: {}
+      };
+
+      var COMMIT_MSG_REGEXP = /^(chore|demo|docs|feat|fix|refactor|style|test)\((.+)\):? (.+)$/;
+      var gitlog = ('' + result).split('\n').reverse();
+
+      if (code) {
+        grunt.log.error(err);
+        done(false);
+      } else {
+
+        gitlog.forEach(function (logItem) {
+          var sha1 = logItem.slice(0, 7);
+          var fullMsg = logItem.slice(8);
+
+          var msgMatches = fullMsg.match(COMMIT_MSG_REGEXP);
+          var changeType = msgMatches[1];
+          var directive = msgMatches[2];
+          var directiveMsg = msgMatches[3];
+
+          if (!changelog[changeType][directive]) {
+            changelog[changeType][directive] = [];
+          }
+          changelog[changeType][directive].push({sha1:sha1, msg:directiveMsg});
+        });
+
+        console.log(grunt.template.process(grunt.file.read('misc/changelog.tpl.md'), {data: {
+          changelog: changelog,
+          today: grunt.template.today('yyyy-mm-dd'),
+          version : grunt.config('pkg.version')
+        }}));
+
+        done();
+      }
+    });
   });
   
   return grunt;

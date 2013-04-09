@@ -1,4 +1,4 @@
-# bootstrap - [AngularJS](http://angularjs.org/) directives specific to [twitter bootstrap](http://twitter.github.com/bootstrap/)
+# bootstrap - [AngularJS](http://angularjs.org/) directives specific to [twitter bootstrap](http://twitter.github.io/bootstrap/)
 
 ***
 
@@ -6,7 +6,7 @@
 
 ## Demo
 
-Do you want to see directives in action? Visit http://angular-ui.github.com/bootstrap/!
+Do you want to see directives in action? Visit http://angular-ui.github.io/bootstrap/!
 
 ## Installation
 
@@ -52,7 +52,7 @@ We are always looking for the quality contributions! Please check the [CONTRIBUT
 ### Development
 #### Prepare your environment
 * Install [Node.js](http://nodejs.org/) and NPM (should come with)
-* Install global dev dependencies: `npm install -g grunt-cli testacular`
+* Install global dev dependencies: `npm install -g grunt-cli karma`
 * Instal local dev dependencies: `npm install` while current directory is bootstrap repo
 
 #### Build
@@ -61,7 +61,7 @@ We are always looking for the quality contributions! Please check the [CONTRIBUT
 Check the Grunt build file for other tasks that are defined for this project
 
 #### TDD
-* Start testacular server: `grunt server`
+* Start karma server: `grunt server`
 * Run test: `grunt test-run`
 
 ### Release
