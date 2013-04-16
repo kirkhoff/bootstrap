@@ -10,12 +10,16 @@ files = [
   'misc/test-lib/angular.js',
   'misc/test-lib/angular-mocks.js',
   'misc/test-lib/helpers.js',
+  'misc/test-lib/es5-shim.min.js',
+  'dist/ieshiv-*.js',
   'src/**/*.js',
   'template/**/*.js'
 ];
 
 // list of files to exclude
 exclude = [
+  // exclude the ieshiv minified version to prevent loading it twice
+  'dist/ieshiv-*.min.js'
 ];
 
 // Start these browsers, currently available:
