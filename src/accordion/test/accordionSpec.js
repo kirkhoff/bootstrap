@@ -116,9 +116,12 @@ describe('accordion', function () {
     beforeEach(inject(function(_$rootScope_, _$compile_) {
       scope = _$rootScope_;
       $compile = _$compile_;
+      
+      element = angular.element('<div>').appendTo(document.body);
     }));
 
     afterEach(function () {
+      element.remove();
       element = groups = scope = $compile = undefined;
     });
 
@@ -128,15 +131,11 @@ describe('accordion', function () {
           "<accordion>" +
             "<accordion-group heading=\"title 1\">Content 1</accordion-group>" +
             "<accordion-group heading=\"title 2\">Content 2</accordion-group>" +
-            "</accordion>";
-        element = angular.element(tpl);
-        angular.element(document.body).append(element);
+          "</accordion>";
+        element.html(tpl);
         $compile(element)(scope);
         scope.$digest();
         groups = element.find('.accordion-group');
-      });
-      afterEach(function() {
-        element.remove();
       });
 
       it('should create accordion groups with content', function () {
@@ -175,7 +174,7 @@ describe('accordion', function () {
           "<accordion>" +
             "<accordion-group ng-repeat='group in groups' heading='{{group.name}}'>{{group.content}}</accordion-group>" +
           "</accordion>";
-        element = angular.element(tpl);
+        element.html(tpl);
         model = [
           {name: 'title 1', content: 'Content 1'},
           {name: 'title 2', content: 'Content 2'}
@@ -220,8 +219,8 @@ describe('accordion', function () {
           "<accordion>" +
             "<accordion-group heading=\"title 1\" is-open=\"open1\">Content 1</accordion-group>" +
             "<accordion-group heading=\"title 2\" is-open=\"open2\">Content 2</accordion-group>" +
-            "</accordion>";
-        element = angular.element(tpl);
+          "</accordion>";
+        element.html(tpl);
         scope.open1 = false;
         scope.open2 = true;
         $compile(element)(scope);
@@ -241,19 +240,14 @@ describe('accordion', function () {
           "<accordion>" +
             "<accordion-group heading=\"title 1\" is-open=\"open1\"><div ng-repeat='item in items'>{{item}}</div></accordion-group>" +
             "<accordion-group heading=\"title 2\" is-open=\"open2\">Static content</accordion-group>" +
-            "</accordion>";
-        element = angular.element(tpl);
+          "</accordion>";
+        element.html(tpl);
         scope.items = ['Item 1', 'Item 2', 'Item 3'];
         scope.open1 = true;
         scope.open2 = false;
-        angular.element(document.body).append(element);
         $compile(element)(scope);
         scope.$digest();
         groups = element.find('.accordion-group');
-      });
-
-      afterEach(function() {
-        element.remove();
       });
 
       it('should have visible group body when the group with isOpen set to true', function () {
@@ -271,7 +265,8 @@ describe('accordion', function () {
               'Body' +
             '</accordion-group>' +
           '</accordion>';
-        element = $compile(tpl)(scope);
+        element.html(tpl);
+        $compile(element)(scope);
         scope.$digest();
         groups = element.find('.accordion-group');
       });
@@ -285,10 +280,20 @@ describe('accordion', function () {
     });
 
     describe('accordion-heading, with repeating accordion-groups', function() {
-      it('should clone the accordion-heading for each group', function() {
-        element = $compile('<accordion><accordion-group ng-repeat="x in [1,2,3]"><accordion-heading>{{x}}</accordion-heading></accordion-group></accordion>')(scope);
+      beforeEach(function() {
+        var tpl =
+          '<accordion>' + 
+            '<accordion-group ng-repeat="x in [1,2,3]">' +
+              '<accordion-heading>{{x}}</accordion-heading>' +
+            '</accordion-group>' +
+          '</accordion>';
+        element.html(tpl);
+        $compile(element)(scope);
         scope.$digest();
         groups = element.find('.accordion-group');
+      });
+      
+      it('should clone the accordion-heading for each group', function() {
         expect(groups.length).toBe(3);
         expect(findGroupLink(0).text()).toBe('1');
         expect(findGroupLink(1).text()).toBe('2');
