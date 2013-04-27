@@ -142,6 +142,34 @@ describe('typeahead tests', function () {
     });
   });
 
+  describe('typeaheadHighlight', function () {
+
+    var highlightFilter;
+    beforeEach(inject(function (typeaheadHighlightFilter) {
+      highlightFilter = typeaheadHighlightFilter;
+    }));
+
+    it('should higlight a match', function () {
+      expect(highlightFilter('before match after', 'match')).toEqual('before <strong>match</strong> after');
+    });
+
+    it('should higlight a match with mixed case', function () {
+      expect(highlightFilter('before MaTch after', 'match')).toEqual('before <strong>MaTch</strong> after');
+    });
+
+    it('should higlight all matches', function () {
+      expect(highlightFilter('before MaTch after match', 'match')).toEqual('before <strong>MaTch</strong> after <strong>match</strong>');
+    });
+
+    it('should do nothing if no match', function () {
+      expect(highlightFilter('before match after', 'nomatch')).toEqual('before match after');
+    });
+
+    it('issue 316 - should work correctly for regexp reserved words', function () {
+      expect(highlightFilter('before (match after', '(match')).toEqual('before <strong>(match</strong> after');
+    });
+  });
+
   describe('typeahead', function () {
 
     var $scope, $compile, $document;
@@ -172,7 +200,7 @@ describe('typeahead tests', function () {
     };
 
     var findDropDown = function(element) {
-      return element.find('div.dropdown');
+      return element.find('ul.typeahead');
     };
 
     var findMatches = function(element) {
@@ -194,7 +222,7 @@ describe('typeahead tests', function () {
           this.message = function() {
             return "Expected '" + angular.mock.dump(this.actual) + "' to be closed.";
           };
-          return !typeaheadEl.hasClass('open') && findMatches(this.actual).length === 0;
+          return typeaheadEl.css('display')==='none' && findMatches(this.actual).length === 0;
 
         }, toBeOpenWithActive: function(noOfMatches, activeIdx) {
 
@@ -204,7 +232,7 @@ describe('typeahead tests', function () {
           this.message = function() {
             return "Expected '" + angular.mock.dump(this.actual) + "' to be opened.";
           };
-          return typeaheadEl.hasClass('open') && liEls.length === noOfMatches && $(liEls[activeIdx]).hasClass('active');
+          return typeaheadEl.css('display')==='block' && liEls.length === noOfMatches && $(liEls[activeIdx]).hasClass('active');
         }
       });
     });
@@ -283,6 +311,21 @@ describe('typeahead tests', function () {
         changeInputValueTo(element, 'not in matches');
         expect($scope.result).toEqual(undefined);
       });
+
+      it('should bind loading indicator expression', inject(function ($timeout) {
+
+        $scope.isLoading = false;
+        $scope.loadMatches = function(viewValue) {
+          return $timeout(function() { return [];}, 1000);
+        };
+
+        var element = prepareInputEl("<div><input ng-model='result' typeahead='item for item in loadMatches()' typeahead-loading='isLoading'></div>");
+        changeInputValueTo(element, 'foo');
+
+        expect($scope.isLoading).toBeTruthy();
+        $timeout.flush();
+        expect($scope.isLoading).toBeFalsy();
+      }));
     });
 
     describe('selecting a match', function () {
@@ -348,12 +391,11 @@ describe('typeahead tests', function () {
         var inputEl = findInput(element);
 
         changeInputValueTo(element, 'b');
-        var dropdown = findDropDown(element);
 
         $document.find('body').click();
         $scope.$digest();
 
-        expect(dropdown).not.toHaveClass('open');
+        expect(element).toBeClosed();
       });
     });
 
