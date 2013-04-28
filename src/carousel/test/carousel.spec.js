@@ -11,7 +11,7 @@ describe('carousel', function() {
   }));
 
   describe('basics', function() {
-    var elm, scope, carouselScope;
+    var elm, scope;
     beforeEach(function() {
       scope = $rootScope.$new();
       scope.slides = [
@@ -19,19 +19,21 @@ describe('carousel', function() {
         {active:false,content:'two'},
         {active:false,content:'three'}
       ];
-      elm = $compile(
+      var tpl =
         '<carousel interval="interval" no-transition="true">' +
           '<slide ng-repeat="slide in slides" active="slide.active">' +
             '{{slide.content}}' +
           '</slide>' +
-        '</carousel>' 
-      )(scope);
-      carouselScope = elm.scope();
+        '</carousel>';
+      elm = angular.element('<div>').appendTo(document.body);
+      elm.html(tpl);
+      $compile(elm)(scope);
       scope.interval = 5000;
       scope.$apply();
     });
     afterEach(function() {
       scope.$destroy();
+      elm.remove();
     });
 
     function testSlideActive(slideIndex) {
@@ -171,10 +173,10 @@ describe('carousel', function() {
       testSlideActive(0);
       $timeout.flush();
       testSlideActive(1);
-      elm.trigger('mouseenter');
+      elm.find('div.carousel').trigger('mouseenter');
       expect($timeout.flush).toThrow();//pause should cancel current timeout
       testSlideActive(1);
-      elm.trigger('mouseleave');
+      elm.find('div.carousel').trigger('mouseleave');
       $timeout.flush();
       testSlideActive(2);
     });
