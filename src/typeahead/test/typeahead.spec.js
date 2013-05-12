@@ -296,7 +296,7 @@ describe('typeahead tests', function () {
 
         var element = prepareInputEl("<div><input ng-model='result' typeahead='item as formatterFn(item) for item in source | filter:$viewValue'></div>");
         changeInputValueTo(element, 'fo');
-        var matchHighlight = findMatches(element).find('a').html();
+        var matchHighlight = findMatches(element).find('a').html().toLowerCase();
         expect(matchHighlight).toEqual('prefix<strong>fo</strong>o');
       });
 
