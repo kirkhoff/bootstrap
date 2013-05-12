@@ -8,23 +8,27 @@ describe('tabs', function() {
   beforeEach(module('template/tabs/tabs.html', 'template/tabs/pane.html'));
 
   beforeEach(inject(function($rootScope, $compile) {
-    // we might move this tpl into an html file as well...
-    elm = angular.element(
-      '<div>' +
-        '<tabs>' +
-          '<pane heading="First Tab">' +
-            'first content is {{first}}' +
-          '</pane>' +
-          '<pane heading="Second Tab">' +
-            'second content is {{second}}' +
-          '</pane>' +
-        '</tabs>' +
-      '</div>');
-
+    elm = angular.element('<div>').appendTo(document.body);
     scope = $rootScope;
+    
+    var tpl =
+      '<tabs>' +
+        '<pane heading="First Tab">' +
+          'first content is {{first}}' +
+        '</pane>' +
+        '<pane heading="Second Tab">' +
+          'second content is {{second}}' +
+        '</pane>' +
+      '</tabs>';
+    elm.html(tpl);
     $compile(elm)(scope);
     scope.$digest();
   }));
+  
+  afterEach(function() {
+    elm.remove();
+    elm = scope = undefined;
+  });
 
 
   it('should create clickable titles', inject(function($compile, $rootScope) {
@@ -98,17 +102,17 @@ describe('remote selection', function() {
   beforeEach(module('template/tabs/tabs.html', 'template/tabs/pane.html'));
 
   beforeEach(inject(function($rootScope, $compile) {
-    // we might move this tpl into an html file as well...
-    elm = angular.element(
-      '<div>' +
-        '<tabs>' +
-          '<pane ng-repeat="pane in panes" active="pane.active" heading="pane.title">' +
-            '{{pane.content}}}' +
-          '</pane>' +
-        '</tabs>' +
-      '</div>'
-    );
+    elm = angular.element('<div>').appendTo(document.body);
     scope = $rootScope;
+    
+    var tpl =
+      '<tabs>' +
+        '<pane ng-repeat="pane in panes" active="pane.active" heading="pane.title">' +
+          '{{pane.content}}}' +
+        '</pane>' +
+      '</tabs>';
+    elm.html(tpl);
+    
     scope.panes = [
       { title:"Dynamic Title 1", content:"Dynamic content 1", active:true},
       { title:"Dynamic Title 2", content:"Dynamic content 2" }
@@ -222,7 +226,18 @@ describe('remove tabs', function() {
 
   it('should remove title panes when elements are destroyed and change selection', inject(function($controller, $compile, $rootScope) {
     var scope = $rootScope;
-    var elm = $compile("<tabs><pane heading='1'>Hello</pane><pane ng-repeat='i in list' heading='tab {{i}}'>content {{i}}</pane></tabs>")(scope);
+    var elm = angular.element('<div>').appendTo(document.body);
+    var tpl =
+      "<tabs>" +
+        "<pane heading='1'>" +
+          "Hello" +
+        "</pane>" +
+        "<pane ng-repeat='i in list' heading='tab {{i}}'>" +
+          "content {{i}}" +
+        "</pane>" +
+      "</tabs>";
+    elm.html(tpl);
+    $compile(elm)(scope);
     scope.$apply();
 
     function titles() {
