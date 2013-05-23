@@ -166,6 +166,20 @@
                        <code>angular.module('myModule', ['ui.bootstrap']);</code>
                     </p>
                     <p>You can fork one of the plunkers from this page to see a working example of what is described here.</p>
+                    <h3>IE8 compatibility</h3>
+                    <p>To be able to use this library on Internet Explorer 8 you must also include:
+                    </p>
+                    <ul>
+                        <li>a <a href="http://en.wikipedia.org/wiki/HTML5_Shiv">shim/shiv</a> library of your choice
+                            (on this site we are using <a href="https://github.com/kriskowal/es5-shim">es5-shim</a>)</li>
+                        <li>the <code>ieshiv-*.js</code> file distributed alongside this library</li>
+                    </ul>
+                    <p>You can include them inside your site like this:
+                    </p>
+                    <pre ng-non-bindable><code data-language="html"><!--[if lt IE 9]>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/es5-shim/1.2.4/es5-shim.min.js"></script>
+    <script src="ieshiv-<%= pkg.version%>.min.js"></script>
+<![endif]--></code></pre>
                 </div>
             </div>
         </section>
