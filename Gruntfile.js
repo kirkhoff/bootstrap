@@ -91,7 +91,7 @@ module.exports = function(grunt) {
       }
     },
     ieshiv: {
-      src: 'misc/ieshiv-template.js',
+      src: 'misc/ieshiv.tpl.js',
       dest: '<%= dist %>/ieshiv-<%= pkg.version %>.js'
     },
     html2js: {
@@ -266,17 +266,17 @@ module.exports = function(grunt) {
   });
   
   grunt.registerTask('ieshiv', 'Create the ieshiv file, based on the current build', function() {
-    var directives = [];
-    var matches = grunt.file.read(grunt.config('concat.dist.dest')).match(/\.directive\([^'"]*('|")[^'"]*('|")/g);
+    var directiveNames = [];
+    var directiveDeclarations = grunt.file.read(grunt.config('concat.dist.dest')).match(/\.directive\([^'"]*('|")[^'"]*('|")/g);
     
-    matches.forEach(function(match) {
-      directives.push(/('|")([^'"]+)('|")/.exec(match)[2]);
+    directiveDeclarations.forEach(function(match) {
+      directiveNames.push(/('|")([^'"]+)('|")/.exec(match)[2]);
     });
     
     grunt.file.write(
       grunt.config('ieshiv.dest'),
       grunt.template.process(grunt.file.read(grunt.config('ieshiv.src')), {data: {
-        directives: '"' + directives.join('", "') + '"',
+        directives: '"' + directiveNames.join('", "') + '"',
         version : grunt.config('pkg.version')
       }})
     );
